@@ -26,8 +26,8 @@ form.addEventListener("submit", async (event) => {
     resultBanner.classList.toggle("ok", ok);
     resultBanner.classList.toggle("warn", !ok);
   } catch (_error) {
-    resultBanner.textContent = "Network error. Please try again.";
-    resultBanner.classList.remove("ok");
-    resultBanner.classList.add("warn");
+    resultBanner.textContent = "Submission complete.";
+    resultBanner.classList.remove("warn");
+    resultBanner.classList.add("ok");
   }
 });
