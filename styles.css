@@ -162,36 +162,6 @@ body {
   background: #f2fff4;
 }
 
-.tarpit {
-  border: 1px solid #e2e7f3;
-  border-radius: 12px;
-  background: #ffffff;
-  padding: 14px;
-  max-height: 60vh;
-  overflow: auto;
-}
-
-.tarpit h2 {
-  margin: 0 0 10px;
-  font-size: 1rem;
-  color: #2a3550;
-}
-
-.tarpit-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.tarpit-list li {
-  padding: 8px 10px;
-  border-radius: 8px;
-  margin-bottom: 6px;
-  background: #f5f8ff;
-  color: #2f3a54;
-  font-size: 0.9rem;
-}
-
 @media (max-width: 640px) {
   .card-head,
   .form-shell {
