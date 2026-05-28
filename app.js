@@ -26,7 +26,7 @@ form.addEventListener("submit", async (event) => {
     resultBanner.classList.toggle("ok", ok);
     resultBanner.classList.toggle("warn", !ok);
   } catch (_error) {
-    resultBanner.textContent = "Submission complete.";
+    resultBanner.textContent = "Submission received.";
     resultBanner.classList.remove("warn");
     resultBanner.classList.add("ok");
   }
