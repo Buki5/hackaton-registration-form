@@ -106,7 +106,7 @@ body {
   inset: 0; /* covers the whole form */
   z-index: 10; /* ensures it sits ABOVE the input fields */
   pointer-events: none; /* allows human clicks to pass through to the real fields */
-  background-image: url("./mask.svg");
+  background-image: url("/api/mask.svg");
   background-size: 100% 100%;
   background-repeat: no-repeat;
 }
