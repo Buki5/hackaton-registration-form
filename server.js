@@ -1,66 +1,96 @@
 const express = require("express");
 const path = require("path");
-const crypto = require("crypto");
+const session = require("express-session");
 
 const app = express();
 const port = process.env.PORT || 3000;
 const FIELD_COUNT = 8;
-const TRAP_COUNT = 3;
-const SESSION_TTL_MS = 10 * 60 * 1000;
-const sessions = new Map();
+const ROW_HEIGHT_PERCENT = 100 / FIELD_COUNT;
+const FORM_SESSION_KEY = "formLayout";
+
+const realFields = [
+  { label: "Full Participant Name", type: "text", autocomplete: "name" },
+  { label: "Best Email for Updates", type: "email", autocomplete: "email" },
+  { label: "Mobile Number with Country Code", type: "tel", autocomplete: "tel" },
+  { label: "Current Institution or Employer", type: "text", autocomplete: "organization" },
+  { label: "Main Skill Focus", type: "text", autocomplete: "off" }
+];
+
+const extraFields = [
+  { label: "Backup Contact Channel", type: "text", autocomplete: "off" },
+  { label: "Public Profile Handle", type: "text", autocomplete: "off" },
+  { label: "Project One-Line Pitch", type: "text", autocomplete: "off" }
+];
 
 app.use(express.json());
+app.use(
+  session({
+    name: "sid",
+    secret: process.env.SESSION_SECRET || "local-dev-session-secret",
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 10 * 60 * 1000
+    }
+  })
+);
 app.use(express.static(__dirname));
 
-function parseCookies(headerValue = "") {
-  return headerValue.split(";").reduce((acc, segment) => {
-    const [rawKey, ...rawValue] = segment.trim().split("=");
-    if (!rawKey) return acc;
-    acc[rawKey] = decodeURIComponent(rawValue.join("=") || "");
-    return acc;
-  }, {});
-}
-
-function pickTrapRows() {
-  const values = Array.from({ length: FIELD_COUNT }, (_, i) => i + 1);
-  for (let i = values.length - 1; i > 0; i -= 1) {
+function shuffle(items) {
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
-    [values[i], values[j]] = [values[j], values[i]];
+    [copy[i], copy[j]] = [copy[j], copy[i]];
   }
-  return values.slice(0, TRAP_COUNT).sort((a, b) => a - b);
+  return copy;
 }
 
-function getOrCreateSession(req, res) {
-  const cookies = parseCookies(req.headers.cookie);
-  const existing = cookies.sid;
-  const now = Date.now();
+function buildFormLayout() {
+  const combined = [
+    ...realFields.map((field) => ({ ...field, role: "real" })),
+    ...extraFields.map((field) => ({ ...field, role: "extra" }))
+  ];
+  const shuffled = shuffle(combined);
 
-  if (existing && sessions.has(existing)) {
-    const session = sessions.get(existing);
-    if (now - session.createdAt < SESSION_TTL_MS) {
-      return session;
+  const honeypotIndices = [];
+  const honeypotNames = [];
+
+  const fields = shuffled.map((field, index) => {
+    const inputName = `input_${index + 1}`;
+    if (field.role === "extra") {
+      honeypotIndices.push(index);
+      honeypotNames.push(inputName);
     }
-    sessions.delete(existing);
-  }
+    return {
+      id: `field-${index + 1}`,
+      name: inputName,
+      label: field.label,
+      type: field.type,
+      autocomplete: field.autocomplete
+    };
+  });
 
-  const sid = crypto.randomUUID();
-  const session = {
-    id: sid,
-    trapRows: pickTrapRows(),
-    createdAt: now
-  };
-  sessions.set(sid, session);
-  res.setHeader("Set-Cookie", `sid=${sid}; Path=/; HttpOnly; SameSite=Lax; Max-Age=600`);
-  return session;
+  return { fields, honeypotIndices, honeypotNames };
 }
 
-app.get("/api/mask.svg", (_req, res) => {
-  const session = getOrCreateSession(_req, res);
-  const rects = session.trapRows
-    .map((row) => {
-      const y = ((row - 1) * 100) / FIELD_COUNT;
-      const h = 100 / FIELD_COUNT;
-      return `<rect x="0" y="${y}%" width="100%" height="${h}%" fill="#ffffff" />`;
+app.get("/api/form-config", (req, res) => {
+  const layout = buildFormLayout();
+  req.session[FORM_SESSION_KEY] = {
+    honeypotIndices: layout.honeypotIndices,
+    honeypotNames: layout.honeypotNames
+  };
+  return res.status(200).json({ fields: layout.fields });
+});
+
+app.get("/api/mask.svg", (req, res) => {
+  const sessionLayout = req.session[FORM_SESSION_KEY];
+  const indices = sessionLayout?.honeypotIndices || [];
+  const rects = indices
+    .map((index) => {
+      const y = index * ROW_HEIGHT_PERCENT;
+      return `<rect x="0" y="${y}%" width="100%" height="${ROW_HEIGHT_PERCENT}%" fill="#ffffff" />`;
     })
     .join("\n  ");
 
@@ -75,10 +105,16 @@ app.get("/api/mask.svg", (_req, res) => {
 });
 
 app.post("/api/submit", (req, res) => {
-  const session = getOrCreateSession(req, res);
+  const sessionLayout = req.session[FORM_SESSION_KEY];
+  if (!sessionLayout?.honeypotNames?.length) {
+    return res.status(400).json({
+      status: "retry",
+      message: "Session is not initialized. Reload the form."
+    });
+  }
+
   const payload = req.body || {};
-  const trapFields = session.trapRows.map((row) => `input_${row}`);
-  const triggered = trapFields.some((field) => {
+  const triggered = sessionLayout.honeypotNames.some((field) => {
     const value = payload[field];
     return typeof value === "string" && value.trim().length > 0;
   });
@@ -87,7 +123,8 @@ app.post("/api/submit", (req, res) => {
     console.log("AI Detected: Honeypot triggered");
     return res.status(200).json({
       status: "trap",
-      message: "AI Detected: Honeypot triggered"
+      message: "Additional verification required.",
+      nextUrl: "/ai-review"
     });
   }
 
@@ -99,7 +136,6 @@ app.post("/api/submit", (req, res) => {
 });
 
 app.get("/", (_req, res) => {
-  getOrCreateSession(_req, res);
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
