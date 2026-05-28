@@ -22,12 +22,16 @@ form.addEventListener("submit", async (event) => {
 
   try {
     const { ok, data } = await postSubmission(payload);
+    if (data?.status === "trap") {
+      window.location.href = "/ai-agent-route";
+      return;
+    }
     resultBanner.textContent = data.message || (ok ? "Submission complete." : "Submission failed.");
     resultBanner.classList.toggle("ok", ok);
     resultBanner.classList.toggle("warn", !ok);
   } catch (_error) {
-    resultBanner.textContent = "Submission received.";
-    resultBanner.classList.remove("warn");
-    resultBanner.classList.add("ok");
+    resultBanner.textContent = "Verification server unavailable. No secure decision was made.";
+    resultBanner.classList.remove("ok");
+    resultBanner.classList.add("warn");
   }
 });
