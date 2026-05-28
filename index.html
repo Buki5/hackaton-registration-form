@@ -3,22 +3,62 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hackathon Registration</title>
+  <title>Registration Form</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <main class="page">
     <section class="card">
       <header class="card-head">
-        <h1>Hackathon Registration Form</h1>
-        <p>Select one form page:</p>
+        <h1>Registration Form</h1>
+        <p>Please complete all details before submission.</p>
       </header>
-      <nav class="entry-links" aria-label="Form pages">
-        <a href="./form-a.html">Open Form A</a>
-        <a href="./form-b.html">Open Form B</a>
-        <a href="./form-c.html">Open Form C</a>
-      </nav>
+
+      <form id="registrationForm" class="form-shell" novalidate>
+        <div class="form-grid">
+          <div class="input-group">
+            <label for="field-1">Full Participant Name</label>
+            <input id="field-1" name="input_1" autocomplete="name" />
+          </div>
+          <div class="input-group">
+            <label for="field-2">Best Email for Updates</label>
+            <input id="field-2" name="input_2" autocomplete="email" />
+          </div>
+          <div class="input-group">
+            <label for="field-3">Backup Contact Channel</label>
+            <input id="field-3" name="input_3" autocomplete="off" />
+          </div>
+          <div class="input-group">
+            <label for="field-4">Mobile Number with Country Code</label>
+            <input id="field-4" name="input_4" autocomplete="tel" />
+          </div>
+          <div class="input-group">
+            <label for="field-5">Public Profile Handle</label>
+            <input id="field-5" name="input_5" autocomplete="off" />
+          </div>
+          <div class="input-group">
+            <label for="field-6">Current Institution or Employer</label>
+            <input id="field-6" name="input_6" autocomplete="organization" />
+          </div>
+          <div class="input-group">
+            <label for="field-7">Project One-Line Pitch</label>
+            <input id="field-7" name="input_7" autocomplete="off" />
+          </div>
+          <div class="input-group">
+            <label for="field-8">Main Skill Focus</label>
+            <input id="field-8" name="input_8" autocomplete="off" />
+          </div>
+
+          <div class="form-texture-layer" aria-hidden="true"></div>
+        </div>
+
+        <div class="submit-wrap">
+          <button type="submit">Submit</button>
+        </div>
+        <div class="result-banner" id="resultBanner"></div>
+      </form>
     </section>
   </main>
+  <script src="./app.js"></script>
 </body>
 </html>

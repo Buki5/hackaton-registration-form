@@ -22,10 +22,9 @@ form.addEventListener("submit", async (event) => {
   resultBanner.classList.remove("ok", "warn");
 
   try {
-    const { ok, data } = await postForm(payload);
-    resultBanner.textContent = data.message || (ok ? "Done" : "Request failed");
-    resultBanner.classList.toggle("ok", ok);
-    resultBanner.classList.toggle("warn", !ok);
+    const { data } = await postForm(payload);
+    resultBanner.textContent = data.message || "Submitted";
+    resultBanner.classList.remove("ok", "warn");
   } catch (error) {
     resultBanner.textContent = "Network error. Please try again.";
     resultBanner.classList.remove("ok");
