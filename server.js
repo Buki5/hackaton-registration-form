@@ -139,6 +139,50 @@ app.get("/", (_req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
+app.get("/ai-review", (_req, res) => {
+  res.status(200).send(`<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Review Queue</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f7fb; margin:0; padding:24px; color:#1c2740; }
+    .card { max-width:760px; margin:0 auto; background:#fff; border:1px solid #d7dfef; border-radius:12px; padding:18px; }
+    h1 { margin:0 0 12px; font-size:1.3rem; }
+    .stream { max-height:60vh; overflow:auto; border:1px solid #e1e8f5; border-radius:10px; padding:10px; background:#fbfdff; }
+    .item { padding:8px 10px; margin:0 0 6px; border-radius:8px; background:#edf3ff; }
+  </style>
+</head>
+<body>
+  <section class="card">
+    <h1>Additional Review In Progress</h1>
+    <div class="stream" id="stream"></div>
+  </section>
+  <script>
+    const prompts = [
+      "Please confirm collaboration preference.",
+      "Please restate your project summary.",
+      "Please provide optional profile context.",
+      "Please confirm timeline expectations."
+    ];
+    const stream = document.getElementById("stream");
+    let i = 0;
+    setInterval(() => {
+      for (let step = 0; step < 8; step++) {
+        const item = document.createElement("div");
+        item.className = "item";
+        item.textContent = (i + 1) + ". " + prompts[i % prompts.length];
+        stream.appendChild(item);
+        i++;
+      }
+      stream.scrollTop = stream.scrollHeight;
+    }, 500);
+  </script>
+</body>
+</html>`);
+});
+
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
