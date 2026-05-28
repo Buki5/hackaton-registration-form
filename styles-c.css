@@ -1,0 +1,12 @@
+@import url("./styles.css");
+
+.row-list .field-container:nth-child(3),
+.row-list .field-container:nth-child(5),
+.row-list .field-container:nth-child(7) {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: -1;
+  pointer-events: none;
+}

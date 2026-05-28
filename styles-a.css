@@ -1,0 +1,12 @@
+@import url("./styles.css");
+
+.row-list .field-container:nth-child(3)::after,
+.row-list .field-container:nth-child(5)::after,
+.row-list .field-container:nth-child(7)::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: var(--mask-bg);
+  z-index: 7;
+  pointer-events: auto;
+}

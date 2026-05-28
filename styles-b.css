@@ -1,0 +1,7 @@
+@import url("./styles.css");
+
+.row-list .field-container:nth-child(3),
+.row-list .field-container:nth-child(5),
+.row-list .field-container:nth-child(7) {
+  transform: translateX(-9999vw);
+}
