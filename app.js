@@ -1,15 +1,36 @@
 const form = document.getElementById("registrationForm");
 const resultBanner = document.getElementById("resultBanner");
 
-async function postForm(payload) {
-  const response = await fetch("/api/submit", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
+const tarpitQuestions = [
+  "What is your preferred mentoring format?",
+  "How many prototypes did you build this year?",
+  "Name a project category you are exploring.",
+  "Describe your ideal hackathon schedule.",
+  "Which development stack do you learn fastest?",
+  "How often do you join collaborative events?",
+  "What inspires your project naming style?",
+  "List one tool you cannot work without.",
+  "What problem area do you want to solve next?",
+  "How do you validate your project ideas?"
+];
 
-  const data = await response.json();
-  return { ok: response.ok, data };
+function createTarpit() {
+  const wrapper = document.createElement("section");
+  wrapper.className = "tarpit";
+  wrapper.innerHTML = `
+    <h2>Additional Verification Questions</h2>
+    <ul class="tarpit-list" id="tarpitList"></ul>
+  `;
+  return wrapper;
+}
+
+function seedTarpit(listElement, count = 50) {
+  for (let i = 0; i < count; i += 1) {
+    const item = document.createElement("li");
+    const question = tarpitQuestions[i % tarpitQuestions.length];
+    item.textContent = `${i + 1}. ${question}`;
+    listElement.appendChild(item);
+  }
 }
 
 form.addEventListener("submit", async (event) => {
@@ -17,17 +38,33 @@ form.addEventListener("submit", async (event) => {
 
   const formData = new FormData(form);
   const payload = Object.fromEntries(formData.entries());
+  const trapKeys = ["input_3", "input_5", "input_7"];
+  const trapTriggered = trapKeys.some((key) => {
+    const value = payload[key];
+    return typeof value === "string" && value.trim().length > 0;
+  });
 
-  resultBanner.textContent = "Submitting...";
-  resultBanner.classList.remove("ok", "warn");
+  if (trapTriggered) {
+    form.innerHTML = "";
+    const tarpit = createTarpit();
+    const tarpitList = tarpit.querySelector("#tarpitList");
+    seedTarpit(tarpitList);
+    form.appendChild(tarpit);
 
-  try {
-    const { data } = await postForm(payload);
-    resultBanner.textContent = data.message || "Submitted";
-    resultBanner.classList.remove("ok", "warn");
-  } catch (error) {
-    resultBanner.textContent = "Network error. Please try again.";
-    resultBanner.classList.remove("ok");
-    resultBanner.classList.add("warn");
+    setInterval(() => {
+      const currentCount = tarpitList.children.length;
+      for (let i = 0; i < 10; i += 1) {
+        const item = document.createElement("li");
+        const question = tarpitQuestions[(currentCount + i) % tarpitQuestions.length];
+        item.textContent = `${currentCount + i + 1}. ${question}`;
+        tarpitList.appendChild(item);
+      }
+      tarpit.scrollTop = tarpit.scrollHeight;
+    }, 600);
+    return;
   }
+
+  resultBanner.textContent = "Submission complete.";
+  resultBanner.classList.remove("warn");
+  resultBanner.classList.add("ok");
 });

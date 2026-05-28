@@ -103,10 +103,10 @@ body {
 
 .form-texture-layer {
   position: absolute;
-  inset: 0;
-  z-index: 10;
-  pointer-events: none;
-  background-image: url("/api/mask.svg");
+  inset: 0; /* covers the whole form */
+  z-index: 10; /* ensures it sits ABOVE the input fields */
+  pointer-events: none; /* allows human clicks to pass through to the real fields */
+  background-image: url("./mask.svg");
   background-size: 100% 100%;
   background-repeat: no-repeat;
 }
@@ -160,6 +160,36 @@ body {
   color: #145a1d;
   border-color: #b8e0bf;
   background: #f2fff4;
+}
+
+.tarpit {
+  border: 1px solid #e2e7f3;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 14px;
+  max-height: 60vh;
+  overflow: auto;
+}
+
+.tarpit h2 {
+  margin: 0 0 10px;
+  font-size: 1rem;
+  color: #2a3550;
+}
+
+.tarpit-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tarpit-list li {
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  background: #f5f8ff;
+  color: #2f3a54;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 640px) {
